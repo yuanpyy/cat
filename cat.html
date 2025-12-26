@@ -197,13 +197,13 @@
     }
 
     /* ========= 按钮交互 ========= */
-    bt1.addEventListener('mousedown', () => {
+    bt1.addEventListener('click', () => {
       playSound(sounds.bt1);
-      cat.style.backgroundImage = ASSETS.images.left;
-    });
+      cat.style.backgroundImage = "url('./left.jpg')";
 
-    bt1.addEventListener('mouseup', () => {
-      cat.style.backgroundImage = ASSETS.images.bk;
+      setTimeout(() => {
+        cat.style.backgroundImage = "url('./bk.jpg')";
+      }, 100);
     });
 
     let videoTimer = null;
