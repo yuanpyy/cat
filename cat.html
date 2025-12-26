@@ -116,75 +116,118 @@
     </div>
   </div>
   <script>
-    const bk = "url('./bk.png')"
-    const rightimg = "url('./right.png')"
-    const leftimg = "url('./left.png')"
-    const videoSrc = './video.mp4';
-    const bt1Sound = new Audio('./luobo.mp3');
-    bt1Sound.preload = 'auto';
+    /* ========= 资源路径 ========= */
+    const ASSETS = {
+      images: {
+        bk: "url('./bk.png')",
+        left: "url('./left.png')",
+        right: "url('./right.png')",
+      },
+      video: './video.mp4',
+      sounds: {
+        bt1: './luobo.mp3',
+        bt2: './good.mp3',
+        start: './luobo.mp3'
+      }
+    };
 
-    const bt2Sound = new Audio('./good.mp3');
-    bt2Sound.preload = 'auto';
-    let bt1 = document.querySelector('.bt1')
-    let bt2 = document.querySelector('.bt2')
-    let cat = document.querySelector('.cat')
+    /* ========= DOM ========= */
+    const bt1 = document.querySelector('.bt1');
+    const bt2 = document.querySelector('.bt2');
+    const cat = document.querySelector('.cat');
 
-    bt1.addEventListener('mousedown', function () {
-      bt1Sound.currentTime = 0;
-      bt1Sound.play();
-      cat.style.backgroundImage = leftimg
+    /* ========= 图片预加载 ========= */
+    function preloadImages() {
+      Object.values(ASSETS.images).forEach(src => {
+        const img = new Image();
+        img.src = src.replace(/url\(['"]?(.*?)['"]?\)/, '$1');
+      });
+    }
 
-    })
-    bt1.addEventListener('mouseup', function () {
-      cat.style.backgroundImage = bk
-    })
+    /* ========= 音频（统一管理 & 复用） ========= */
+    function createAudio(src) {
+      const audio = new Audio(src);
+      audio.preload = 'auto';
+      audio.load();
+      return audio;
+    }
 
-    bt2.addEventListener('click', function () {
-      console.log('bt2被点击了');
-      cat.style.backgroundImage = rightimg
+    const sounds = {
+      bt1: createAudio(ASSETS.sounds.bt1),
+      bt2: createAudio(ASSETS.sounds.bt2),
+      start: createAudio(ASSETS.sounds.start)
+    };
 
-      if (window.videoTimer) clearTimeout(window.videoTimer);
-      window.videoTimer = setTimeout(function () {
-        console.log('定时器执行了，开始创建视频');
-        bt2Sound.currentTime = 0;
-        bt2Sound.play();
-        playVideoInCat()
-      }, 500)
-    })
+    function playSound(audio) {
+      audio.pause();
+      audio.currentTime = 0;
+      audio.play().catch(() => { });
+    }
+
+    /* ========= 视频（只创建一次，避免卡顿） ========= */
+    const video = document.createElement('video');
+    video.src = ASSETS.video;
+    video.preload = 'auto';
+    video.muted = true;
+    video.playsInline = true;
+    video.controls = false;
+    video.style.opacity = '0';
+
+    let videoReady = false;
+
+    video.addEventListener('canplay', () => {
+      videoReady = true;
+    });
 
     function playVideoInCat() {
-      const oldVideo = cat.querySelector('video');
-      if (oldVideo) oldVideo.remove();
+      if (!videoReady) return;
 
-      const video = document.createElement('video');
-      video.src = videoSrc;
-      video.autoplay = true;
-      video.muted = true;
-      video.playsInline = true;
-      video.controls = false;
-
-      // 👇 关键：先隐藏视频
       video.style.opacity = '0';
+      cat.style.backgroundImage = 'none';
 
-      // 视频真正可以播放时再显示
-      video.addEventListener('canplay', () => {
+      if (!cat.contains(video)) {
+        cat.appendChild(video);
+      }
+
+      requestAnimationFrame(() => {
+        video.currentTime = 0;
+        video.play().catch(() => { });
         video.style.opacity = '1';
-        cat.style.backgroundImage = 'none';
       });
-
-      cat.appendChild(video);
     }
-    const startSound = new Audio('./luobo.mp3');
-    startSound.preload = 'auto';
 
-    window.addEventListener('load', () => {
-      setTimeout(() => {
-        startSound.currentTime = 0;
-        startSound.play();
+    /* ========= 按钮交互 ========= */
+    bt1.addEventListener('mousedown', () => {
+      playSound(sounds.bt1);
+      cat.style.backgroundImage = ASSETS.images.left;
+    });
+
+    bt1.addEventListener('mouseup', () => {
+      cat.style.backgroundImage = ASSETS.images.bk;
+    });
+
+    let videoTimer = null;
+
+    bt2.addEventListener('click', () => {
+      cat.style.backgroundImage = ASSETS.images.right;
+
+      if (videoTimer) clearTimeout(videoTimer);
+      videoTimer = setTimeout(() => {
+        playSound(sounds.bt2);
+        playVideoInCat();
       }, 500);
     });
 
+    /* ========= 页面加载完成 ========= */
+    window.addEventListener('load', () => {
+      preloadImages();
+
+      setTimeout(() => {
+        playSound(sounds.start);
+      }, 500);
+    });
   </script>
+
 </body>
 
 </html>
