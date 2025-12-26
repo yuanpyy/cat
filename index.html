@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>开始游戏</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
+
+
+    .cat {
+      margin: 70px auto;
+      width: 360px;
+      height: 640px;
+      background-image: url('./bk.png');
+      background-size: cover;
+      background-repeat: no-repeat;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .start-btn {
+      position: absolute;
+      left: 50%;
+      bottom: 120px;
+      transform: translateX(-50%);
+      width: 200px;
+      height: 50px;
+      background-color: #f4ef72;
+      border: none;
+      border-radius: 10px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .start-btn:active {
+      transform: translateX(-50%) scale(0.96);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="cat">
+    <button class="start-btn">开始游戏</button>
+  </div>
+
+  <script>
+    const startBtn = document.querySelector('.start-btn');
+
+    // 用于“解锁音频权限”的音频
+    const unlockAudio = new Audio('./luobo.mp3');
+    unlockAudio.preload = 'auto';
+
+    startBtn.addEventListener('click', () => {
+      unlockAudio.play().then(() => {
+        unlockAudio.pause();
+        unlockAudio.currentTime = 0;
+
+        // 跳转到游戏页
+        window.location.href = './cat.html';
+      }).catch(() => {
+        // 就算失败也跳转
+        window.location.href = './cat.html';
+      });
+    });
+  </script>
+
+</body>
+
+</html>
