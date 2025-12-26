@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>cat</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
+
+    .cat {
+      margin: 70px auto;
+      width: 360px;
+      height: 640px;
+      background-image: url(./bk.png);
+      background-repeat: no-repeat;
+      background-size: cover;
+      position: relative;
+      /* 作为视频绝对定位的父级 */
+      background-color: #000;
+      /* 可选：留白部分设为黑色，更美观 */
+      overflow: hidden !important;
+      /* 兜底：防止视频轻微偏移溢出 */
+    }
+
+    .cat video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      /* 关键：完整显示视频 */
+      z-index: 1;
+      background-color: #000;
+      /* transition: opacity 0.3s ease; */
+    }
+
+    .btn {
+      position: absolute;
+      left: 0;
+      bottom: 60px;
+      width: 100%;
+      display: flex;
+      /* justify-content: space-between; */
+      gap: 40px;
+      z-index: 10;
+    }
+
+    /* 按钮基础样式 */
+    .bt {
+      width: 90px;
+      height: 42px;
+      background: linear-gradient(180deg, #fff3a0, #f4ef72);
+      border: none;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: bold;
+      color: #5c5200;
+
+      /* 立体感 */
+      box-shadow:
+        0 6px 0 #c9c24d,
+        0 10px 18px rgba(0, 0, 0, 0.35);
+
+      transition: all 0.15s ease;
+    }
+
+    /* 悬浮 */
+    .bt:hover {
+      filter: brightness(1.05);
+    }
+
+    /* 按下 */
+    .bt:active {
+      transform: translateY(4px);
+      box-shadow:
+        0 2px 0 #c9c24d,
+        0 6px 12px rgba(0, 0, 0, 0.4);
+    }
+
+    /* 第二个按钮稍微换个色（区分左右） */
+    .bt2 {
+      background: linear-gradient(180deg, #c2f3ff, #7fd7ff);
+      color: #03536b;
+      box-shadow:
+        0 6px 0 #4bb1d6,
+        0 10px 18px rgba(0, 0, 0, 0.35);
+    }
+
+    .bt2:active {
+      box-shadow:
+        0 2px 0 #4bb1d6,
+        0 6
+    }
+
+    .bt1 {
+      margin-left: 62px;
+    }
+
+    .bt2 {
+      margin-left: 48px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="cat">
+    <div class="btn">
+      <button class="bt1 bt">选择</button>
+      <button class="bt2 bt">选择</button>
+    </div>
+  </div>
+  <script>
+    const bk = "url('./bk.png')"
+    const rightimg = "url('./right.png')"
+    const leftimg = "url('./left.png')"
+    const videoSrc = './video.mp4';
+    const bt1Sound = new Audio('./luobo.mp3');
+    bt1Sound.preload = 'auto';
+
+    const bt2Sound = new Audio('./good.mp3');
+    bt2Sound.preload = 'auto';
+    let bt1 = document.querySelector('.bt1')
+    let bt2 = document.querySelector('.bt2')
+    let cat = document.querySelector('.cat')
+
+    bt1.addEventListener('mousedown', function () {
+      bt1Sound.currentTime = 0;
+      bt1Sound.play();
+      cat.style.backgroundImage = leftimg
+
+    })
+    bt1.addEventListener('mouseup', function () {
+      cat.style.backgroundImage = bk
+    })
+
+    bt2.addEventListener('click', function () {
+      console.log('bt2被点击了');
+      cat.style.backgroundImage = rightimg
+
+      if (window.videoTimer) clearTimeout(window.videoTimer);
+      window.videoTimer = setTimeout(function () {
+        console.log('定时器执行了，开始创建视频');
+        bt2Sound.currentTime = 0;
+        bt2Sound.play();
+        playVideoInCat()
+      }, 500)
+    })
+
+    function playVideoInCat() {
+      const oldVideo = cat.querySelector('video');
+      if (oldVideo) oldVideo.remove();
+
+      const video = document.createElement('video');
+      video.src = videoSrc;
+      video.autoplay = true;
+      video.muted = true;
+      video.playsInline = true;
+      video.controls = false;
+
+      // 👇 关键：先隐藏视频
+      video.style.opacity = '0';
+
+      // 视频真正可以播放时再显示
+      video.addEventListener('canplay', () => {
+        video.style.opacity = '1';
+        cat.style.backgroundImage = 'none';
+      });
+
+      cat.appendChild(video);
+    }
+    const startSound = new Audio('./luobo.mp3');
+    startSound.preload = 'auto';
+
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        startSound.currentTime = 0;
+        startSound.play();
+      }, 500);
+    });
+
+  </script>
+</body>
+
+</html>
